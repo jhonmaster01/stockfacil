@@ -1,0 +1,964 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>StockFácil Móvil - Prototipo TRL5 (UNAD Proyecto de Grado)</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap');
+        body {
+            font-family: 'Roboto', sans-serif;
+            background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+            min-height: 100vh;
+        }
+        /* Mockup del Smartphone */
+        .phone-frame {
+            width: 395px;
+            height: 810px;
+            background: #ffffff;
+            border: 12px solid #1e293b;
+            border-radius: 46px;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.65), 0 0 0 4px #334155;
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+        .phone-notch {
+            position: absolute;
+            top: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 140px;
+            height: 22px;
+            background: #1e293b;
+            border-bottom-left-radius: 16px;
+            border-bottom-right-radius: 16px;
+            z-index: 50;
+        }
+        .phone-camera {
+            position: absolute;
+            top: 5px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 10px;
+            height: 10px;
+            background: #0f172a;
+            border-radius: 50%;
+            border: 1px solid #334155;
+        }
+        /* Animación del láser del escáner */
+        @keyframes scanLaser {
+            0% { top: 10%; opacity: 0.8; }
+            50% { top: 90%; opacity: 1; }
+            100% { top: 10%; opacity: 0.8; }
+        }
+        .laser-line {
+            position: absolute;
+            width: 90%;
+            left: 5%;
+            height: 3px;
+            background: #ef4444;
+            box-shadow: 0 0 10px #ef4444, 0 0 20px #ef4444;
+            animation: scanLaser 2s infinite ease-in-out;
+        }
+        /* Scrollbar personalizada */
+        ::-webkit-scrollbar {
+            width: 4px;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 4px;
+        }
+    </style>
+</head>
+<body class="p-4 md:p-8 flex items-center justify-center">
+
+    <div class="max-w-7xl w-full grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
+        
+        <!-- PANEL LATERAL IZQUIERDO: FICHA TÉCNICA Y CONTROLES DEL VIDEO -->
+        <div class="lg:col-span-5 text-white space-y-6">
+            <div class="bg-slate-800/80 backdrop-blur border border-slate-700 rounded-2xl p-6 shadow-xl">
+                <div class="flex items-center space-x-3 mb-4">
+                    <span class="px-3 py-1 bg-amber-500/20 text-amber-300 border border-amber-500/40 rounded-full text-xs font-bold tracking-wider uppercase">
+                        Nivel de Maduración: TRL 5
+                    </span>
+                    <span class="px-3 py-1 bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 rounded-full text-xs font-bold tracking-wider uppercase">
+                        Offline-First Activo
+                    </span>
+                </div>
+                <h1 class="text-3xl font-extrabold text-white tracking-tight">StockFácil Móvil</h1>
+                <p class="text-slate-300 text-sm mt-1">Control de inventarios personalizable para micronegocios minoristas de Quípama, Boyacá.</p>
+                
+                <div class="mt-4 pt-4 border-t border-slate-700/80 grid grid-cols-2 gap-3 text-xs">
+                    <div>
+                        <span class="text-slate-400 block">Estudiante Formulador:</span>
+                        <strong class="text-white text-sm">Jhon Fernando Ruiz Salinas</strong>
+                        <span class="text-slate-400 block text-[11px]">C.C. 1.118.549.711</span>
+                    </div>
+                    <div>
+                        <span class="text-slate-400 block">Docente Tutor:</span>
+                        <strong class="text-white text-sm">Cesar Felipe Henao Villa</strong>
+                        <span class="text-slate-400 block text-[11px]">UNAD - ECBTI</span>
+                    </div>
+                    <div>
+                        <span class="text-slate-400 block">Metodología Ágil:</span>
+                        <span class="text-cyan-300 font-semibold">AEGIS-MD (Amaya, 2015)</span>
+                    </div>
+                    <div>
+                        <span class="text-slate-400 block">Seguridad del Software:</span>
+                        <span class="text-cyan-300 font-semibold">S-SDLC (Miguel & Luis, 2020)</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- CONTROLES RÁPIDOS PARA MOSTRAR EN EL VIDEO DE SUSTENTACIÓN -->
+            <div class="bg-slate-800/80 backdrop-blur border border-slate-700 rounded-2xl p-6 shadow-xl space-y-4">
+                <h2 class="text-lg font-bold text-slate-100 flex items-center">
+                    <i class="fa-solid fa-play-circle text-indigo-400 mr-2"></i> Acciones Rápidas para el Video (10 Min)
+                </h2>
+                <p class="text-slate-400 text-xs">Usa estos botones durante la grabación para demostrar inmediatamente el comportamiento reactivo de la app:</p>
+
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+                    <button onclick="demoScan('7702004003456')" class="text-left px-3.5 py-2.5 bg-slate-700 hover:bg-slate-600 border border-slate-600 rounded-xl transition flex items-center space-x-3 text-xs">
+                        <i class="fa-solid fa-barcode text-amber-400 text-lg"></i>
+                        <div>
+                            <strong class="block text-slate-200">1. Escanear Café</strong>
+                            <span class="text-slate-400 text-[11px]">Simular lectura cámara</span>
+                        </div>
+                    </button>
+                    <button onclick="demoQuickSale('7702004003456', 2)" class="text-left px-3.5 py-2.5 bg-rose-950/40 hover:bg-rose-900/60 border border-rose-800/60 rounded-xl transition flex items-center space-x-3 text-xs">
+                        <i class="fa-solid fa-triangle-exclamation text-rose-400 text-lg"></i>
+                        <div>
+                            <strong class="block text-rose-200">2. Venta Crítica</strong>
+                            <span class="text-rose-300/70 text-[11px]">Disparar alerta stock</span>
+                        </div>
+                    </button>
+                    <button onclick="demoQuickRestock('7702001001234', 10)" class="text-left px-3.5 py-2.5 bg-emerald-950/40 hover:bg-emerald-900/60 border border-emerald-800/60 rounded-xl transition flex items-center space-x-3 text-xs">
+                        <i class="fa-solid fa-truck-ramp-box text-emerald-400 text-lg"></i>
+                        <div>
+                            <strong class="block text-emerald-200">3. Entrada Mayorista</strong>
+                            <span class="text-emerald-300/70 text-[11px]">+10 Arroz Diana</span>
+                        </div>
+                    </button>
+                    <button onclick="switchTab('audit')" class="text-left px-3.5 py-2.5 bg-indigo-950/40 hover:bg-indigo-900/60 border border-indigo-800/60 rounded-xl transition flex items-center space-x-3 text-xs">
+                        <i class="fa-solid fa-clipboard-check text-indigo-400 text-lg"></i>
+                        <div>
+                            <strong class="block text-indigo-200">4. Auditoría Estante</strong>
+                            <span class="text-indigo-300/70 text-[11px]">Conciliación física</span>
+                        </div>
+                    </button>
+                </div>
+
+                <div class="pt-2 flex justify-between items-center text-xs text-slate-400">
+                    <span>Base de datos: <span class="text-emerald-400 font-mono">SQLite (Room)</span></span>
+                    <a href="/api/export-csv" class="text-cyan-400 hover:text-cyan-300 font-medium flex items-center">
+                        <i class="fa-solid fa-download mr-1.5"></i> Descargar Respaldo CSV
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- CENTRO: SMARTPHONE ANDROID MOCKUP INTERACTIVO -->
+        <div class="lg:col-span-7 flex justify-center">
+            
+            <div class="phone-frame">
+                <!-- Notch superior -->
+                <div class="phone-notch">
+                    <div class="phone-camera"></div>
+                </div>
+
+                <!-- Barra de estado superior Android -->
+                <div class="h-8 bg-slate-900 text-slate-300 px-6 flex justify-between items-center text-xs select-none z-10 pt-1">
+                    <span id="currentTime" class="font-semibold text-[11px]">12:30</span>
+                    <div class="flex items-center space-x-2 text-[10px]">
+                        <span class="bg-emerald-500/20 text-emerald-400 px-1.5 py-0.5 rounded font-bold uppercase text-[9px]">OFFLINE</span>
+                        <i class="fa-solid fa-wifi"></i>
+                        <i class="fa-solid fa-battery-full text-emerald-400"></i>
+                    </div>
+                </div>
+
+                <!-- Cabecera de la App Móvil -->
+                <div class="bg-indigo-600 text-white px-4 py-3 shadow-md flex justify-between items-center z-10">
+                    <div class="flex items-center space-x-2">
+                        <i class="fa-solid fa-boxes-stacked text-lg"></i>
+                        <div>
+                            <h2 class="font-bold text-base leading-tight">StockFácil</h2>
+                            <p class="text-[10px] text-indigo-200">Quípama - Micronegocio</p>
+                        </div>
+                    </div>
+                    <button onclick="refreshData()" class="p-2 hover:bg-indigo-700 rounded-full transition" title="Refrescar">
+                        <i class="fa-solid fa-rotate text-sm"></i>
+                    </button>
+                </div>
+
+                <!-- CONTENEDOR PRINCIPAL SCROLLABLE DE PANTALLAS -->
+                <div class="flex-1 bg-slate-50 overflow-y-auto pb-16 relative" id="screenContainer">
+                    
+                    <!-- PANTALLA 1: DASHBOARD / INICIO -->
+                    <div id="tab-dashboard" class="p-4 space-y-4">
+                        <!-- Tarjeta de Valorización de Inventario -->
+                        <div class="bg-gradient-to-r from-indigo-600 to-blue-600 text-white rounded-2xl p-4 shadow-lg">
+                            <span class="text-xs text-indigo-100 uppercase tracking-wide font-medium">Valor Total del Inventario</span>
+                            <div class="text-2xl font-black mt-1" id="dashTotalValue">$0 COP</div>
+                            <div class="mt-3 flex justify-between text-xs text-indigo-100 border-t border-indigo-400/40 pt-2">
+                                <span>Total Unidades: <strong class="text-white" id="dashTotalUnits">0</strong></span>
+                                <span>Productos: <strong class="text-white" id="dashTotalProducts">0</strong></span>
+                            </div>
+                        </div>
+
+                        <!-- Banner Alerta de Stock Mínimo -->
+                        <div id="dashAlertBanner" onclick="switchTab('alerts')" class="cursor-pointer bg-rose-50 border border-rose-200 rounded-xl p-3 flex items-center justify-between shadow-sm transition hover:bg-rose-100">
+                            <div class="flex items-center space-x-3">
+                                <div class="w-9 h-9 bg-rose-500 text-white rounded-lg flex items-center justify-center font-bold text-sm shadow">
+                                    <i class="fa-solid fa-bell animate-bounce"></i>
+                                </div>
+                                <div>
+                                    <h4 class="font-bold text-rose-900 text-xs">Alertas de Reabastecimiento</h4>
+                                    <p class="text-rose-600 text-[11px]" id="dashAlertText">Cargando alertas...</p>
+                                </div>
+                            </div>
+                            <i class="fa-solid fa-chevron-right text-rose-400 text-xs"></i>
+                        </div>
+
+                        <!-- Botones de Acción Rápida Móvil -->
+                        <div class="grid grid-cols-2 gap-3">
+                            <button onclick="switchTab('scan')" class="bg-white p-3.5 rounded-xl border border-slate-200 shadow-sm hover:border-indigo-400 transition flex flex-col items-center text-center">
+                                <div class="w-10 h-10 bg-indigo-50 text-indigo-600 rounded-full flex items-center justify-center mb-2">
+                                    <i class="fa-solid fa-camera text-base"></i>
+                                </div>
+                                <span class="font-bold text-slate-800 text-xs">Escanear Producto</span>
+                                <span class="text-[10px] text-slate-500">Cámara o lector</span>
+                            </button>
+                            <button onclick="switchTab('audit')" class="bg-white p-3.5 rounded-xl border border-slate-200 shadow-sm hover:border-indigo-400 transition flex flex-col items-center text-center">
+                                <div class="w-10 h-10 bg-amber-50 text-amber-600 rounded-full flex items-center justify-center mb-2">
+                                    <i class="fa-solid fa-clipboard-list text-base"></i>
+                                </div>
+                                <span class="font-bold text-slate-800 text-xs">Auditar Estante</span>
+                                <span class="text-[10px] text-slate-500">Conteo físico</span>
+                            </button>
+                        </div>
+
+                        <!-- Resumen de Últimos Productos Registrados -->
+                        <div>
+                            <div class="flex justify-between items-center mb-2">
+                                <h3 class="font-bold text-slate-800 text-xs">Existencias Recientes</h3>
+                                <button onclick="switchTab('catalog')" class="text-indigo-600 text-[11px] font-semibold hover:underline">Ver catálogo</button>
+                            </div>
+                            <div class="space-y-2" id="dashProductPreview">
+                                <!-- Render dinámico -->
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- PANTALLA 2: CATÁLOGO DE PRODUCTOS -->
+                    <div id="tab-catalog" class="p-4 space-y-3 hidden">
+                        <div class="flex justify-between items-center">
+                            <h3 class="font-bold text-slate-800 text-sm">Catálogo de Productos</h3>
+                            <button onclick="openNewProductModal()" class="bg-indigo-600 text-white px-3 py-1.5 rounded-lg text-xs font-semibold flex items-center space-x-1 shadow hover:bg-indigo-700">
+                                <i class="fa-solid fa-plus"></i> <span>Nuevo</span>
+                            </button>
+                        </div>
+
+                        <!-- Buscador en tiempo real -->
+                        <div class="relative">
+                            <i class="fa-solid fa-magnifying-glass absolute left-3 top-2.5 text-slate-400 text-xs"></i>
+                            <input type="text" id="catalogSearch" oninput="filterCatalog()" placeholder="Buscar por nombre o código..." class="w-full pl-8 pr-3 py-1.5 text-xs bg-white border border-slate-200 rounded-lg focus:outline-none focus:border-indigo-500 shadow-sm">
+                        </div>
+
+                        <!-- Lista de tarjetas de productos -->
+                        <div class="space-y-2.5 pt-1" id="catalogList">
+                            <!-- Render dinámico -->
+                        </div>
+                    </div>
+
+                    <!-- PANTALLA 3: ESCÁNER ÓPTICO Y REGISTRO DE MOVIMIENTOS -->
+                    <div id="tab-scan" class="p-4 space-y-4 hidden">
+                        <h3 class="font-bold text-slate-800 text-sm flex items-center">
+                            <i class="fa-solid fa-barcode text-indigo-600 mr-2"></i> Escáner de Códigos de Barras
+                        </h3>
+
+                        <!-- Visor de la Cámara Simulado con animación láser -->
+                        <div class="relative w-full h-44 bg-slate-900 rounded-2xl overflow-hidden border-2 border-indigo-500 shadow-inner flex flex-col items-center justify-center text-white">
+                            <div class="laser-line"></div>
+                            
+                            <!-- Esquinas del visor táctil -->
+                            <div class="absolute top-3 left-3 w-6 h-6 border-t-2 border-l-2 border-indigo-400"></div>
+                            <div class="absolute top-3 right-3 w-6 h-6 border-t-2 border-r-2 border-indigo-400"></div>
+                            <div class="absolute bottom-3 left-3 w-6 h-6 border-b-2 border-l-2 border-indigo-400"></div>
+                            <div class="absolute bottom-3 right-3 w-6 h-6 border-b-2 border-r-2 border-indigo-400"></div>
+
+                            <i class="fa-solid fa-camera text-slate-500 text-3xl mb-2"></i>
+                            <span class="text-xs text-slate-300 font-medium">Apunte la cámara al código EAN/UPC</span>
+                            <span class="text-[10px] text-indigo-300 font-mono mt-1">Google ML Kit Vision API</span>
+                        </div>
+
+                        <!-- Selector rápido de productos para demostración -->
+                        <div class="space-y-2">
+                            <label class="block text-xs font-semibold text-slate-700">Seleccionar o ingresar código de barras:</label>
+                            <div class="flex space-x-2">
+                                <select id="scanSelect" onchange="onSelectBarcode(this.value)" class="flex-1 bg-white border border-slate-300 rounded-lg px-2.5 py-1.5 text-xs text-slate-700 focus:outline-none focus:border-indigo-500">
+                                    <option value="">-- Seleccionar producto de muestra --</option>
+                                    <option value="7702001001234">7702001001234 - Arroz Diana 1000g</option>
+                                    <option value="7702004003456">7702004003456 - Café Sello Rojo 500g (Alerta)</option>
+                                    <option value="7702006001122">7702006001122 - Leche Alquería 1000ml (Crítico)</option>
+                                    <option value="7702002005678">7702002005678 - Aceite Premier 1000ml</option>
+                                    <option value="7702007003344">7702007003344 - Huevos AA Canastilla x30</option>
+                                </select>
+                                <button onclick="triggerScanSound()" class="bg-slate-800 text-white px-3 py-1.5 rounded-lg text-xs hover:bg-slate-700" title="Probar sonido">
+                                    <i class="fa-solid fa-volume-high"></i>
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Ficha de Producto Detectado y Formulario de Movimiento -->
+                        <div id="detectedProductCard" class="bg-white border border-slate-200 rounded-2xl p-4 shadow-sm hidden space-y-3">
+                            <div class="flex justify-between items-start border-b border-slate-100 pb-2">
+                                <div>
+                                    <h4 class="font-bold text-slate-900 text-xs" id="detectedName">-</h4>
+                                    <span class="text-[10px] text-slate-500" id="detectedCategoryUnit">-</span>
+                                </div>
+                                <div class="text-right">
+                                    <span class="text-[10px] text-slate-400 block">Stock Actual</span>
+                                    <strong class="text-sm font-bold text-indigo-600" id="detectedStock">0</strong>
+                                </div>
+                            </div>
+
+                            <!-- Botones Tipo de Movimiento -->
+                            <div class="grid grid-cols-2 gap-2">
+                                <button type="button" onclick="setMovementType('ENTRADA_COMPRA')" id="btnMoveIn" class="py-2 text-xs font-bold rounded-lg border border-emerald-500 bg-emerald-50 text-emerald-700 flex items-center justify-center space-x-1">
+                                    <i class="fa-solid fa-arrow-down"></i> <span>Entrada (Compra)</span>
+                                </button>
+                                <button type="button" onclick="setMovementType('SALIDA_VENTA')" id="btnMoveOut" class="py-2 text-xs font-bold rounded-lg border border-slate-200 bg-white text-slate-600 flex items-center justify-center space-x-1">
+                                    <i class="fa-solid fa-arrow-up"></i> <span>Salida (Venta)</span>
+                                </button>
+                            </div>
+
+                            <!-- Campo de Cantidad -->
+                            <div>
+                                <label class="block text-[11px] font-semibold text-slate-600 mb-1">Cantidad a registrar:</label>
+                                <div class="flex items-center space-x-2">
+                                    <button onclick="adjustQty(-1)" class="w-8 h-8 bg-slate-100 rounded-lg text-slate-600 font-bold">-</button>
+                                    <input type="number" id="moveQty" value="1" min="1" step="0.5" class="flex-1 text-center font-bold text-sm bg-slate-50 border border-slate-200 rounded-lg py-1.5 focus:outline-none focus:border-indigo-500">
+                                    <button onclick="adjustQty(1)" class="w-8 h-8 bg-slate-100 rounded-lg text-slate-600 font-bold">+</button>
+                                </div>
+                            </div>
+
+                            <!-- Botón Confirmar Transacción -->
+                            <button onclick="submitMovement()" class="w-full bg-indigo-600 text-white font-bold py-2.5 rounded-xl text-xs hover:bg-indigo-700 transition shadow-md flex items-center justify-center space-x-2">
+                                <i class="fa-solid fa-check"></i> <span>Confirmar Movimiento Local</span>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- PANTALLA 4: ALERTAS DE REABASTECIMIENTO -->
+                    <div id="tab-alerts" class="p-4 space-y-3 hidden">
+                        <div class="flex justify-between items-center">
+                            <h3 class="font-bold text-slate-800 text-sm flex items-center text-rose-600">
+                                <i class="fa-solid fa-bell mr-2"></i> Monitoreo de Stock Crítico
+                            </h3>
+                            <span class="text-[11px] bg-rose-100 text-rose-700 px-2 py-0.5 rounded-full font-bold" id="badgeAlertCount">0</span>
+                        </div>
+                        <p class="text-[11px] text-slate-500">Artículos cuyas existencias igualan o descienden del punto de reorden configurado.</p>
+
+                        <div class="space-y-2.5 pt-1" id="alertsList">
+                            <!-- Render dinámico -->
+                        </div>
+                    </div>
+
+                    <!-- PANTALLA 5: AUDITORÍA Y CONTEO FÍSICO -->
+                    <div id="tab-audit" class="p-4 space-y-4 hidden">
+                        <h3 class="font-bold text-slate-800 text-sm flex items-center">
+                            <i class="fa-solid fa-clipboard-check text-amber-600 mr-2"></i> Auditoría Física de Estantes
+                        </h3>
+                        <p class="text-[11px] text-slate-500">Compara el conteo físico real contra el saldo contable para identificar mermas o roturas.</p>
+
+                        <div class="bg-white border border-slate-200 rounded-2xl p-4 shadow-sm space-y-3">
+                            <div>
+                                <label class="block text-xs font-semibold text-slate-700 mb-1">Producto a Auditar:</label>
+                                <select id="auditSelect" onchange="onSelectAuditProduct(this.value)" class="w-full bg-slate-50 border border-slate-300 rounded-lg px-2.5 py-1.5 text-xs text-slate-700">
+                                    <option value="">-- Seleccionar producto --</option>
+                                </select>
+                            </div>
+
+                            <div id="auditDetails" class="hidden space-y-3 pt-2 border-t border-slate-100">
+                                <div class="grid grid-cols-2 gap-2 text-xs">
+                                    <div class="bg-slate-50 p-2 rounded-lg">
+                                        <span class="text-slate-400 text-[10px] block">Stock en Sistema:</span>
+                                        <strong class="text-slate-800 text-sm" id="auditSystemStock">0</strong>
+                                    </div>
+                                    <div class="bg-slate-50 p-2 rounded-lg">
+                                        <span class="text-slate-400 text-[10px] block">Costo Unitario:</span>
+                                        <strong class="text-slate-800 text-sm" id="auditCostPrice">$0</strong>
+                                    </div>
+                                </div>
+
+                                <div>
+                                    <label class="block text-xs font-semibold text-slate-700 mb-1">Conteo Físico Real en Estante:</label>
+                                    <input type="number" id="auditPhysicalInput" oninput="calculateAuditDiff()" placeholder="Digitar conteo" class="w-full text-center font-bold text-sm bg-white border border-slate-300 rounded-lg py-1.5 focus:outline-none focus:border-amber-500">
+                                </div>
+
+                                <!-- Resultado de discrepancia -->
+                                <div id="auditResultBox" class="p-3 rounded-xl text-xs font-medium space-y-1">
+                                    <div class="flex justify-between">
+                                        <span>Diferencia en Unidades:</span>
+                                        <strong id="auditDiffUnits">0</strong>
+                                    </div>
+                                    <div class="flex justify-between">
+                                        <span>Impacto Financiero (Costo):</span>
+                                        <strong id="auditDiffMoney">$0 COP</strong>
+                                    </div>
+                                </div>
+
+                                <button onclick="confirmAuditReconcile()" class="w-full bg-amber-600 text-white font-bold py-2 rounded-xl text-xs hover:bg-amber-700 transition shadow">
+                                    Ajustar y Conciliar Stock en Sistema
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+
+                <!-- BARRA DE NAVEGACIÓN INFERIOR (BOTTOM NAVIGATION ANDROID) -->
+                <div class="h-14 bg-white border-t border-slate-200 grid grid-cols-5 items-center px-1 z-10">
+                    <button onclick="switchTab('dashboard')" id="nav-dashboard" class="flex flex-col items-center justify-center text-indigo-600 py-1">
+                        <i class="fa-solid fa-house text-sm"></i>
+                        <span class="text-[9px] font-medium mt-0.5">Inicio</span>
+                    </button>
+                    <button onclick="switchTab('catalog')" id="nav-catalog" class="flex flex-col items-center justify-center text-slate-400 py-1 hover:text-indigo-600">
+                        <i class="fa-solid fa-boxes-stacked text-sm"></i>
+                        <span class="text-[9px] font-medium mt-0.5">Catálogo</span>
+                    </button>
+                    <button onclick="switchTab('scan')" id="nav-scan" class="flex flex-col items-center justify-center text-slate-400 py-1 hover:text-indigo-600">
+                        <div class="w-8 h-8 bg-indigo-600 text-white rounded-full flex items-center justify-center shadow -mt-3">
+                            <i class="fa-solid fa-barcode text-xs"></i>
+                        </div>
+                        <span class="text-[9px] font-medium mt-0.5">Escanear</span>
+                    </button>
+                    <button onclick="switchTab('alerts')" id="nav-alerts" class="flex flex-col items-center justify-center text-slate-400 py-1 hover:text-indigo-600 relative">
+                        <i class="fa-solid fa-bell text-sm"></i>
+                        <span class="text-[9px] font-medium mt-0.5">Alertas</span>
+                        <span id="navAlertDot" class="absolute top-1 right-5 w-2 h-2 bg-rose-500 rounded-full hidden"></span>
+                    </button>
+                    <button onclick="switchTab('audit')" id="nav-audit" class="flex flex-col items-center justify-center text-slate-400 py-1 hover:text-indigo-600">
+                        <i class="fa-solid fa-clipboard-check text-sm"></i>
+                        <span class="text-[9px] font-medium mt-0.5">Auditoría</span>
+                    </button>
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+    <!-- MODAL NUEVO PRODUCTO -->
+    <div id="newProductModal" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
+        <div class="bg-white rounded-2xl max-w-sm w-full p-5 space-y-4 shadow-2xl">
+            <div class="flex justify-between items-center border-b pb-2">
+                <h3 class="font-bold text-slate-800 text-sm">Agregar Producto Personalizado</h3>
+                <button onclick="closeNewProductModal()" class="text-slate-400 hover:text-slate-600 text-sm">&times;</button>
+            </div>
+            <div class="space-y-2.5 text-xs">
+                <div>
+                    <label class="block font-semibold text-slate-600 mb-0.5">Código de Barras:</label>
+                    <input type="text" id="newBarcode" placeholder="Ej. 7702009998881" class="w-full bg-slate-50 border rounded-lg p-2 focus:border-indigo-500">
+                </div>
+                <div>
+                    <label class="block font-semibold text-slate-600 mb-0.5">Nombre del Producto:</label>
+                    <input type="text" id="newName" placeholder="Ej. Lenteja El Grano 500g" class="w-full bg-slate-50 border rounded-lg p-2 focus:border-indigo-500">
+                </div>
+                <div class="grid grid-cols-2 gap-2">
+                    <div>
+                        <label class="block font-semibold text-slate-600 mb-0.5">Categoría:</label>
+                        <select id="newCategory" class="w-full bg-slate-50 border rounded-lg p-2">
+                            <option value="Víveres">Víveres</option>
+                            <option value="Aseo">Aseo</option>
+                            <option value="Lácteos">Lácteos</option>
+                            <option value="Ferretería">Ferretería</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block font-semibold text-slate-600 mb-0.5">Unidad de Medida:</label>
+                        <select id="newUnit" class="w-full bg-slate-50 border rounded-lg p-2">
+                            <option value="Libra">Libra</option>
+                            <option value="Kilo">Kilo</option>
+                            <option value="Bulto">Bulto</option>
+                            <option value="Unidad">Unidad</option>
+                            <option value="Canastilla">Canastilla</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="grid grid-cols-2 gap-2">
+                    <div>
+                        <label class="block font-semibold text-slate-600 mb-0.5">Precio Costo ($):</label>
+                        <input type="number" id="newCost" placeholder="3000" class="w-full bg-slate-50 border rounded-lg p-2">
+                    </div>
+                    <div>
+                        <label class="block font-semibold text-slate-600 mb-0.5">Precio Venta ($):</label>
+                        <input type="number" id="newSale" placeholder="3800" class="w-full bg-slate-50 border rounded-lg p-2">
+                    </div>
+                </div>
+                <div class="grid grid-cols-2 gap-2">
+                    <div>
+                        <label class="block font-semibold text-slate-600 mb-0.5">Stock Inicial:</label>
+                        <input type="number" id="newStock" value="10" class="w-full bg-slate-50 border rounded-lg p-2">
+                    </div>
+                    <div>
+                        <label class="block font-semibold text-slate-600 mb-0.5">Stock Mínimo:</label>
+                        <input type="number" id="newMin" value="4" class="w-full bg-slate-50 border rounded-lg p-2">
+                    </div>
+                </div>
+            </div>
+            <div class="flex space-x-2 pt-2">
+                <button onclick="closeNewProductModal()" class="flex-1 py-2 bg-slate-100 text-slate-700 rounded-xl text-xs font-semibold">Cancelar</button>
+                <button onclick="submitNewProduct()" class="flex-1 py-2 bg-indigo-600 text-white rounded-xl text-xs font-semibold hover:bg-indigo-700">Guardar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- TOAST DE NOTIFICACIÓN FLOTANTE -->
+    <div id="toastNotification" class="fixed bottom-5 right-5 z-50 bg-slate-900 text-white px-4 py-3 rounded-2xl shadow-2xl border border-slate-700 text-xs flex items-center space-x-3 transition transform translate-y-24 opacity-0">
+        <i id="toastIcon" class="fa-solid fa-circle-check text-emerald-400 text-base"></i>
+        <span id="toastMessage">Mensaje de notificación</span>
+    </div>
+
+    <script>
+        // Variables globales del prototipo
+        let productsData = [];
+        let activeTab = 'dashboard';
+        let currentMovementType = 'ENTRADA_COMPRA';
+        let currentSelectedProduct = null;
+        let audioCtx = null;
+
+        // Sonido de Beep para escáner
+        function playBeep(freq = 900, duration = 0.12) {
+            try {
+                if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+                osc.type = "sine";
+                osc.frequency.value = freq;
+                gain.gain.setValueAtTime(0.15, audioCtx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + duration);
+                osc.connect(gain);
+                gain.connect(audioCtx.destination);
+                osc.start();
+                osc.stop(audioCtx.currentTime + duration);
+            } catch(e) {}
+        }
+
+        function triggerScanSound() {
+            playBeep(980, 0.15);
+        }
+
+        function showToast(msg, isSuccess = true) {
+            const toast = document.getElementById('toastNotification');
+            const icon = document.getElementById('toastIcon');
+            const message = document.getElementById('toastMessage');
+            message.textContent = msg;
+            if (isSuccess) {
+                icon.className = "fa-solid fa-circle-check text-emerald-400 text-base";
+            } else {
+                icon.className = "fa-solid fa-triangle-exclamation text-rose-400 text-base";
+            }
+            toast.classList.remove('translate-y-24', 'opacity-0');
+            setTimeout(() => {
+                toast.classList.add('translate-y-24', 'opacity-0');
+            }, 3000);
+        }
+
+        // Reloj superior
+        function updateClock() {
+            const now = new Date();
+            const h = String(now.getHours()).padStart(2, '0');
+            const m = String(now.getMinutes()).padStart(2, '0');
+            document.getElementById('currentTime').textContent = `${h}:${m}`;
+        }
+        setInterval(updateClock, 1000);
+        updateClock();
+
+        // Navegación entre pestañas
+        function switchTab(tabId) {
+            activeTab = tabId;
+            const tabs = ['dashboard', 'catalog', 'scan', 'alerts', 'audit'];
+            tabs.forEach(t => {
+                document.getElementById(`tab-${t}`).classList.add('hidden');
+                const navBtn = document.getElementById(`nav-${t}`);
+                if (navBtn) {
+                    navBtn.classList.remove('text-indigo-600');
+                    navBtn.classList.add('text-slate-400');
+                }
+            });
+            document.getElementById(`tab-${tabId}`).classList.remove('hidden');
+            const activeNav = document.getElementById(`nav-${tabId}`);
+            if (activeNav) {
+                activeNav.classList.add('text-indigo-600');
+                activeNav.classList.remove('text-slate-400');
+            }
+        }
+
+        // Cargar estadísticas y datos del backend
+        async function refreshData() {
+            try {
+                // 1. Estadísticas
+                const resStats = await fetch('/api/stats');
+                const stats = await resStats.json();
+                document.getElementById('dashTotalValue').textContent = `$${stats.total_value_cop.toLocaleString('es-CO')} COP`;
+                document.getElementById('dashTotalUnits').textContent = stats.total_units;
+                document.getElementById('dashTotalProducts').textContent = stats.total_products;
+                
+                const alertText = stats.critical_count > 0 
+                    ? `¡${stats.critical_count} productos requieren reorden!`
+                    : `Inventario óptimo. 0 productos críticos.`;
+                document.getElementById('dashAlertText').textContent = alertText;
+                document.getElementById('badgeAlertCount').textContent = stats.critical_count;
+                
+                const dot = document.getElementById('navAlertDot');
+                if (stats.critical_count > 0) dot.classList.remove('hidden');
+                else dot.classList.add('hidden');
+
+                // 2. Productos
+                const resProd = await fetch('/api/products');
+                productsData = await resProd.json();
+                renderCatalog(productsData);
+                renderDashPreview(productsData);
+                populateAuditSelect(productsData);
+
+                // 3. Alertas
+                const resAlerts = await fetch('/api/alerts');
+                const alertsData = await resAlerts.json();
+                renderAlerts(alertsData);
+
+            } catch(e) {
+                console.error("Error al refrescar datos:", e);
+            }
+        }
+
+        function renderDashPreview(list) {
+            const box = document.getElementById('dashProductPreview');
+            box.innerHTML = '';
+            list.slice(0, 4).forEach(p => {
+                const isCrit = p.current_stock <= p.minimum_stock;
+                const badge = isCrit 
+                    ? `<span class="text-[9px] bg-rose-100 text-rose-700 px-1.5 py-0.5 rounded font-bold">Crítico</span>`
+                    : `<span class="text-[9px] bg-emerald-100 text-emerald-700 px-1.5 py-0.5 rounded font-bold">OK</span>`;
+                box.innerHTML += `
+                    <div class="bg-white p-2.5 rounded-xl border border-slate-200 flex justify-between items-center text-xs shadow-sm">
+                        <div>
+                            <strong class="text-slate-800 block">${p.name}</strong>
+                            <span class="text-[10px] text-slate-400">${p.category} | ${p.unit_measure}</span>
+                        </div>
+                        <div class="text-right">
+                            <span class="font-bold text-slate-800">${p.current_stock}</span>
+                            ${badge}
+                        </div>
+                    </div>
+                `;
+            });
+        }
+
+        function renderCatalog(list) {
+            const container = document.getElementById('catalogList');
+            container.innerHTML = '';
+            list.forEach(p => {
+                const isCrit = p.current_stock <= p.minimum_stock;
+                const statusColor = isCrit ? 'text-rose-600 bg-rose-50 border-rose-200' : 'text-emerald-700 bg-emerald-50 border-emerald-200';
+                container.innerHTML += `
+                    <div class="bg-white p-3 rounded-xl border border-slate-200 shadow-sm space-y-2">
+                        <div class="flex justify-between items-start">
+                            <div>
+                                <h4 class="font-bold text-slate-900 text-xs">${p.name}</h4>
+                                <span class="text-[10px] text-slate-400 font-mono">${p.barcode}</span>
+                            </div>
+                            <span class="text-[10px] px-2 py-0.5 rounded-full font-bold border ${statusColor}">
+                                ${p.current_stock} ${p.unit_measure}
+                            </span>
+                        </div>
+                        <div class="flex justify-between items-center text-[11px] pt-1 border-t border-slate-100">
+                            <span class="text-slate-500">Costo: <strong>$${p.cost_price.toLocaleString('es-CO')}</strong></span>
+                            <span class="text-indigo-600 font-bold">Venta: $${p.sale_price.toLocaleString('es-CO')}</span>
+                            <button onclick="quickScanAndLoad('${p.barcode}')" class="text-xs text-indigo-600 hover:text-indigo-800 p-1" title="Operar">
+                                <i class="fa-solid fa-arrow-right-arrow-left"></i>
+                            </button>
+                        </div>
+                    </div>
+                `;
+            });
+        }
+
+        function filterCatalog() {
+            const query = document.getElementById('catalogSearch').value.toLowerCase();
+            const filtered = productsData.filter(p => 
+                p.name.toLowerCase().includes(query) || 
+                p.barcode.toLowerCase().includes(query) ||
+                p.category.toLowerCase().includes(query)
+            );
+            renderCatalog(filtered);
+        }
+
+        function renderAlerts(alerts) {
+            const container = document.getElementById('alertsList');
+            container.innerHTML = '';
+            if (alerts.length === 0) {
+                container.innerHTML = `
+                    <div class="bg-emerald-50 border border-emerald-200 rounded-xl p-4 text-center text-xs text-emerald-800">
+                        <i class="fa-solid fa-circle-check text-2xl text-emerald-500 mb-1 block"></i>
+                        ¡Excelente! No hay productos en riesgo de desabastecimiento.
+                    </div>
+                `;
+                return;
+            }
+            alerts.forEach(a => {
+                const deficit = a.minimum_stock - a.current_stock;
+                container.innerHTML += `
+                    <div class="bg-white p-3 rounded-xl border-l-4 border-rose-500 border border-slate-200 shadow-sm space-y-2">
+                        <div class="flex justify-between items-start">
+                            <div>
+                                <h4 class="font-bold text-slate-900 text-xs">${a.name}</h4>
+                                <span class="text-[10px] text-slate-400 font-mono">${a.barcode}</span>
+                            </div>
+                            <span class="text-[10px] bg-rose-100 text-rose-700 px-2 py-0.5 rounded-full font-bold">
+                                Faltan ${deficit > 0 ? deficit : 0} un
+                            </span>
+                        </div>
+                        <div class="grid grid-cols-2 gap-2 text-[11px] bg-slate-50 p-2 rounded-lg">
+                            <span>Stock Actual: <strong class="text-rose-600">${a.current_stock}</strong></span>
+                            <span>Stock Mínimo: <strong class="text-slate-800">${a.minimum_stock}</strong></span>
+                        </div>
+                        <button onclick="demoQuickRestock('${a.barcode}', 10)" class="w-full bg-emerald-600 text-white py-1.5 rounded-lg text-xs font-semibold hover:bg-emerald-700 flex items-center justify-center space-x-1">
+                            <i class="fa-solid fa-plus"></i> <span>Reabastecer +10 unidades</span>
+                        </button>
+                    </div>
+                `;
+            });
+        }
+
+        // Escáner y Selección de Producto
+        function onSelectBarcode(code) {
+            if (!code) return;
+            quickScanAndLoad(code);
+        }
+
+        async function quickScanAndLoad(barcode) {
+            playBeep(920, 0.12);
+            switchTab('scan');
+            try {
+                const res = await fetch(`/api/products/barcode/${barcode}`);
+                const data = await res.json();
+                if (data.found) {
+                    currentSelectedProduct = data.product;
+                    document.getElementById('detectedName').textContent = currentSelectedProduct.name;
+                    document.getElementById('detectedCategoryUnit').textContent = `${currentSelectedProduct.category} | Unidad: ${currentSelectedProduct.unit_measure}`;
+                    document.getElementById('detectedStock').textContent = `${currentSelectedProduct.current_stock} ${currentSelectedProduct.unit_measure}`;
+                    document.getElementById('detectedProductCard').classList.remove('hidden');
+                    document.getElementById('scanSelect').value = barcode;
+                }
+            } catch(e) {
+                console.error(e);
+            }
+        }
+
+        function setMovementType(type) {
+            currentMovementType = type;
+            const btnIn = document.getElementById('btnMoveIn');
+            const btnOut = document.getElementById('btnMoveOut');
+            if (type === 'ENTRADA_COMPRA') {
+                btnIn.className = "py-2 text-xs font-bold rounded-lg border border-emerald-500 bg-emerald-50 text-emerald-700 flex items-center justify-center space-x-1";
+                btnOut.className = "py-2 text-xs font-bold rounded-lg border border-slate-200 bg-white text-slate-600 flex items-center justify-center space-x-1";
+            } else {
+                btnOut.className = "py-2 text-xs font-bold rounded-lg border border-rose-500 bg-rose-50 text-rose-700 flex items-center justify-center space-x-1";
+                btnIn.className = "py-2 text-xs font-bold rounded-lg border border-slate-200 bg-white text-slate-600 flex items-center justify-center space-x-1";
+            }
+        }
+
+        function adjustQty(delta) {
+            const input = document.getElementById('moveQty');
+            let val = parseFloat(input.value) || 1;
+            val = Math.max(1, val + delta);
+            input.value = val;
+        }
+
+        async function submitMovement() {
+            if (!currentSelectedProduct) return;
+            const qty = parseFloat(document.getElementById('moveQty').value);
+            if (!qty || qty <= 0) {
+                showToast("Cantidad inválida", false);
+                return;
+            }
+
+            try {
+                const res = await fetch('/api/movement', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({
+                        product_id: currentSelectedProduct.id,
+                        movement_type: currentMovementType,
+                        quantity: qty,
+                        notes: currentMovementType === 'ENTRADA_COMPRA' ? 'Compra mayorista' : 'Venta mostrador'
+                    })
+                });
+                const resData = await res.json();
+                if (resData.success) {
+                    playBeep(resData.alert_triggered ? 500 : 1200, 0.2);
+                    showToast(`Transacción exitosa. Nuevo stock: ${resData.new_stock}`);
+                    await refreshData();
+                    quickScanAndLoad(currentSelectedProduct.barcode);
+                } else {
+                    showToast(resData.message, false);
+                }
+            } catch(e) {
+                showToast("Error de conexión local", false);
+            }
+        }
+
+        // Auditoría física
+        function populateAuditSelect(list) {
+            const sel = document.getElementById('auditSelect');
+            sel.innerHTML = '<option value="">-- Seleccionar producto --</option>';
+            list.forEach(p => {
+                sel.innerHTML += `<option value="${p.id}">${p.name} (Stock: ${p.current_stock})</option>`;
+            });
+        }
+
+        function onSelectAuditProduct(pId) {
+            if (!pId) {
+                document.getElementById('auditDetails').classList.add('hidden');
+                return;
+            }
+            const p = productsData.find(item => item.id == pId);
+            if (p) {
+                document.getElementById('auditSystemStock').textContent = `${p.current_stock} ${p.unit_measure}`;
+                document.getElementById('auditCostPrice').textContent = `$${p.cost_price.toLocaleString('es-CO')}`;
+                document.getElementById('auditPhysicalInput').value = p.current_stock;
+                document.getElementById('auditDetails').classList.remove('hidden');
+                calculateAuditDiff();
+            }
+        }
+
+        function calculateAuditDiff() {
+            const pId = document.getElementById('auditSelect').value;
+            const p = productsData.find(item => item.id == pId);
+            if (!p) return;
+            const physical = parseFloat(document.getElementById('auditPhysicalInput').value) || 0;
+            const diff = physical - p.current_stock;
+            const diffMoney = diff * p.cost_price;
+
+            const box = document.getElementById('auditResultBox');
+            document.getElementById('auditDiffUnits').textContent = `${diff >= 0 ? '+' : ''}${diff.toFixed(1)} ${p.unit_measure}`;
+            document.getElementById('auditDiffMoney').textContent = `${diffMoney >= 0 ? '+' : ''}$${diffMoney.toLocaleString('es-CO')} COP`;
+
+            if (diff < 0) {
+                box.className = "p-3 rounded-xl text-xs font-medium space-y-1 bg-rose-50 border border-rose-200 text-rose-800";
+            } else if (diff > 0) {
+                box.className = "p-3 rounded-xl text-xs font-medium space-y-1 bg-blue-50 border border-blue-200 text-blue-800";
+            } else {
+                box.className = "p-3 rounded-xl text-xs font-medium space-y-1 bg-emerald-50 border border-emerald-200 text-emerald-800";
+            }
+        }
+
+        async function confirmAuditReconcile() {
+            const pId = document.getElementById('auditSelect').value;
+            const physical = parseFloat(document.getElementById('auditPhysicalInput').value);
+            if (isNaN(physical)) return;
+
+            try {
+                const res = await fetch('/api/audit', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({
+                        product_id: parseInt(pId),
+                        physical_stock: physical
+                    })
+                });
+                const data = await res.json();
+                if (data.success) {
+                    playBeep(1100, 0.15);
+                    showToast("Inventario conciliado exitosamente");
+                    await refreshData();
+                    onSelectAuditProduct(pId);
+                }
+            } catch(e) {
+                showToast("Error al conciliar", false);
+            }
+        }
+
+        // Modal Nuevo Producto
+        function openNewProductModal() {
+            document.getElementById('newProductModal').classList.remove('hidden');
+        }
+        function closeNewProductModal() {
+            document.getElementById('newProductModal').classList.add('hidden');
+        }
+        async function submitNewProduct() {
+            const barcode = document.getElementById('newBarcode').value.trim();
+            const name = document.getElementById('newName').value.trim();
+            const cat = document.getElementById('newCategory').value;
+            const unit = document.getElementById('newUnit').value;
+            const cost = parseFloat(document.getElementById('newCost').value) || 0;
+            const sale = parseFloat(document.getElementById('newSale').value) || 0;
+            const stock = parseFloat(document.getElementById('newStock').value) || 0;
+            const min = parseFloat(document.getElementById('newMin').value) || 0;
+
+            if (!barcode || !name) {
+                showToast("Código y nombre son obligatorios", false);
+                return;
+            }
+
+            try {
+                const res = await fetch('/api/products', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({
+                        barcode, name, category: cat, unit_measure: unit,
+                        cost_price: cost, sale_price: sale,
+                        current_stock: stock, minimum_stock: min
+                    })
+                });
+                const data = await res.json();
+                if (data.success) {
+                    showToast("Producto registrado en catálogo");
+                    closeNewProductModal();
+                    await refreshData();
+                } else {
+                    showToast(data.message, false);
+                }
+            } catch(e) {
+                showToast("Error de conexión", false);
+            }
+        }
+
+        // Acciones automáticas de demostración para el video
+        function demoScan(code) {
+            quickScanAndLoad(code);
+        }
+
+        async function demoQuickSale(barcode, qty) {
+            await quickScanAndLoad(barcode);
+            setMovementType('SALIDA_VENTA');
+            document.getElementById('moveQty').value = qty;
+            setTimeout(() => {
+                submitMovement();
+            }, 600);
+        }
+
+        async function demoQuickRestock(barcode, qty) {
+            await quickScanAndLoad(barcode);
+            setMovementType('ENTRADA_COMPRA');
+            document.getElementById('moveQty').value = qty;
+            setTimeout(() => {
+                submitMovement();
+            }, 600);
+        }
+
+        // Inicializar al cargar
+        window.addEventListener('DOMContentLoaded', () => {
+            refreshData();
+        });
+    </script>
+</body>
+</html>
